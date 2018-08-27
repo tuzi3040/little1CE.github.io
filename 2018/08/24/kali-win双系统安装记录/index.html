@@ -1,0 +1,130 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <!--css-->
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.gdgdocs.org/css?family=Lobster" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Alegreya|Bangers|Cuprum|Permanent+Marker|Shrikhand" rel="stylesheet">
+     <link rel="stylesheet" href="/css/head.css">
+    <h1 class="topic_class text-center ">The Worst Version Of little1CE</h1>
+        <h2 class="text-center">~try to make the worst seem better~</h2>
+            <p class="text-center other_p">AM is my favourite band without doubt.<br>Every song of them is a poem.</p>
+</head>
+
+<body>
+<div class="main-part">
+  <div >
+       <!--css-->
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.gdgdocs.org/css?family=Lobster" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Alegreya|Bangers|Cuprum|Permanent+Marker|Shrikhand" rel="stylesheet">
+     <link rel="stylesheet" href="/css/post.css">
+<article id="post">
+  <h1 id="H1">kali+win双系统安装记录</h1>
+  <div class="page_content">
+  <h3 id="0x00-前言"><a href="#0x00-前言" class="headerlink" title="0x00 前言"></a>0x00 前言</h3><ul>
+<li>本文适合有一定linux+win双系统安装经验的人阅读。</li>
+<li>使用：<ul>
+<li>一台 惠普暗影精灵3 笔记本<ul>
+<li>显卡：Nvidia GTX1050Ti</li>
+<li>网卡：Realtek 8822be</li>
+<li>一个 16G 淘宝U盘</li>
+<li>ISO使用 Kali-Linux-64bit 2018.1</li>
+<li>软件：<ul>
+<li>分区：（win自带）diskpart/傲梅分区助手专业版</li>
+<li>刻盘：USB-writer 1.3</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>linux新手，本文目的在于记录学习，欢迎指教。</li>
+</ul>
+<h3 id="0x01-安装双系统"><a href="#0x01-安装双系统" class="headerlink" title="0x01 安装双系统"></a>0x01 安装双系统</h3><p>注：整个安装过程中bios的安全启动都是关闭的。</p>
+<ul>
+<li>卸载之前安装的dabian </li>
+</ul>
+<p>由于我之前安装了debian+win双系统，所以得先卸掉debian。打开cmd输入diskpart打开程序，删除掉之前的debian的主分区和交换空间，以及debian的efi存放空间。（这部分在我的D盘上，不会影响到在c盘的win的引导文件。）<br>由于我使用rEFind来管理启动项，如果不删除已经删掉系统的efi文件的话，rEFind会出现错误的启动选项。</p>
+<p>主要用到命令：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">list disk</span><br><span class="line">select disk n （n为选择的磁盘号）</span><br><span class="line">list partition</span><br><span class="line">select partition n （n为选择的区号）</span><br><span class="line">delete partition  （这条命令删除之前选择的区）</span><br><span class="line">delete partition override （使用强制删除命令才能删除efi分区）</span><br></pre></td></tr></table></figure>
+<ul>
+<li>分区</li>
+</ul>
+<p>由于D盘存放文件过多不好迁移备份，冒险使用傲梅分区助手的无损分区功能（即不格式化分区直接进行分区），成功分出100G空间。</p>
+<ul>
+<li>制作启动盘</li>
+</ul>
+<p>奇怪的是使用UltroISO或Rufus刻的启动盘都会在安装过程中的复制光盘内容那一步失败，提示无法找到光盘内容（这步之前的安装程序是可以进行的），最后使用了不知道哪年哪月何处下载的功能极简的USB-writer1.3刻盘，后续无问题。（话说这个USB-writer除了刻盘的那部分外其余分区都是删掉的状态，所以刻完看见你的U盘大小变小了不要惊讶……）</p>
+<ul>
+<li>安装</li>
+</ul>
+<p>重启电脑，狂敲F9（hp系f9可直接选择启动项）选择从CD/DVD那项进入（还有个USB项是u盘刻完后剩下的无用空间）进入kali安装程序，除了无法正确配置网络，一路顺利安装下来。（选择稍后配置网络和不使用网络镜像）</p>
+<ul>
+<li><p>重启</p>
+<p>完后重启，狂敲F10进入bios，管理启动项顺序，    按F6可将启动项提升一级，F5降低一级，F10保存。设置启动项文件顺序为rEFind-win-kali，保存开机后成功进入rEFind界面。选择kali图标，成功进入kali的grub，最后卡死在加载进登录界面之前。</p>
+</li>
+</ul>
+<h3 id="0x02-解决问题"><a href="#0x02-解决问题" class="headerlink" title="0x02 解决问题"></a>0x02 解决问题</h3><ul>
+<li>安装过程中找不到光盘内容</li>
+</ul>
+<p>使用<a href="https://sourceforge.net/projects/usbwriter/files/?source=navbar" target="_blank" rel="noopener">USB-writer 1.3</a> 刻盘。</p>
+<ul>
+<li>解决开机黑屏问题</li>
+</ul>
+<p>这个问题是由开源独显驱动nouveau引起的，一开始尝试网上关闭独显的教程没成功，后来想干脆把nouveau卸载了。在kali的grub中的advance选项中选择recovery mode输入root命令进入命令行</p>
+<p>卸载nouveau：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt remove xserver-xorg-video-nouveau</span><br></pre></td></tr></table></figure>
+<p>把nouveau加入黑名单</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/modprobe.d/blacklist.conf</span><br></pre></td></tr></table></figure>
+<p>在这个文件中写入</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">blacklist nouveau</span><br></pre></td></tr></table></figure>
+<p>重启后稍等片刻（等的好紧张），成功进入桌面。</p>
+<p>后续你可以：从nvidia官网下载对应的linux闭源驱动安装试试……<br>（debian9-4.9 上成功过）</p>
+<ul>
+<li><p>找不到wifi adapter问题</p>
+<p>是听说从linux-kernel 14.4开始就支持rtl8822be（之前debian的wifi问题解决是从github上找来的模块自己编译了用）才想着正好重新装个kali2018，不过很遗憾，进去一看还是没有wifi，设置中显示找不到wifi-adapter。<strong>lspci</strong>查看硬件可以看见rtl8822be。手机usb网络共享+<strong>apt update</strong>/<strong>apt upgrade</strong>/<strong>apt dist-upgrade</strong>三连。然后安装了linux-headers，依然没有wifi，但是bluetooth却可以用（这两个功能应是rtl8822be管的）。最后发现<strong>lib/firmware/rtl_bt/</strong>下有rtl8822b_fw.bin,但是<strong>lib/firmware/rtl_nix/</strong>和<strong>/rtlwifi/</strong>都没有8822be相关的bin文件。最后还是在github上下了一个别人写的驱动编译后成功使用wifi。</p>
+</li>
+</ul>
+<p>所以在这里总结一下安装linux后<strong>找不到对应的无线网卡驱动</strong>要怎么办：</p>
+<ol>
+<li>升级内核，安装对应linux-headers。<br>以及一份linux-firmware文件备份：<a href="https://github.com/wkennington/linux-firmware" target="_blank" rel="noopener">https://github.com/wkennington/linux-firmware</a></li>
+<li>若还是不行，则可在github上找找是否有他人编写的对应驱动，然后自行编译（<code>make</code>&amp;<code>make install</code>&amp;<code>modprobe 对应模块名字</code>）：</li>
+</ol>
+<ul>
+<li><p>内核4.10及以下的可以用：<a href="https://github.com/rtlwifi-linux/rtlwifi-next" target="_blank" rel="noopener">https://github.com/rtlwifi-linux/rtlwifi-next</a></p>
+</li>
+<li><p>内核4.14及以上的可以用：<a href="https://github.com/lwfinger/rtlwifi_new/tree/extended" target="_blank" rel="noopener">https://github.com/lwfinger/rtlwifi_new/tree/extended</a><br>（我在kali上成功编译的版本）<br> 以及其他github项目。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">其他内核没有试过。</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<ol>
+<li>使用linux支持的usb网卡。</li>
+<li>立即使用有线网。</li>
+</ol>
+<p>若是其他linux发行版，可以看看我在下面放的参考链接。</p>
+<p><strong>参考链接</strong></p>
+<ul>
+<li><a href="https://ubuntuforums.org/showthread.php?t=2364383" target="_blank" rel="noopener">https://ubuntuforums.org/showthread.php?t=2364383</a></li>
+<li><a href="https://blog.csdn.net/chenyiyue/article/details/52516395" target="_blank" rel="noopener">https://blog.csdn.net/chenyiyue/article/details/52516395</a></li>
+<li><a href="https://askubuntu.com/questions/1002957/rlt-8822be-wireless-problems" target="_blank" rel="noopener">https://askubuntu.com/questions/1002957/rlt-8822be-wireless-problems</a></li>
+<li><a href="https://blog.csdn.net/xingce_cs/article/details/76851087" target="_blank" rel="noopener">https://blog.csdn.net/xingce_cs/article/details/76851087</a></li>
+</ul>
+
+  </div>
+</article>
+
+
+
+  </div>
+  <div>
+<p class="other_p" style="margin-left:20px">Click <a href='http://www.arcticmonkeys.com/' target="_blank"><span style="color:#BABFAB">HERE</span></a> to get more information about their new album.</p>
+</div>
+
+
+</div>
+</body>
+</html>
