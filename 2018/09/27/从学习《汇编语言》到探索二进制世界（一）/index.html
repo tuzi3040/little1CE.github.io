@@ -1,0 +1,201 @@
+<html>
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon/bitbug_favicon.ico">
+    <title>The Worst Version Of Little1CE</title>
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="/bootstrap/css/bootstrap.min.css">
+    <!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+    <link rel="stylesheet" href="/css/ie10-viewport-bug-workaround.css">
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" href="/css/blog.css">
+    <!-- Google Fonts-->
+    <link href="https://fonts.gdgdocs.org/css?family=Lobster" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Alegreya|Bangers|Cuprum|Permanent+Marker|Shrikhand" rel="stylesheet">
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    
+<script>
+	(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+	})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+	ga('create', 'UA-83746351-2', 'auto');
+	ga('send', 'pageview');
+</script>
+
+</head>
+<body>
+<!-- Menu -->
+    <div class="blog-masthead">
+    <div class="container">
+        <nav class="blog-nav">
+            
+                <a class="blog-nav-item" href="/">Home</a>
+            
+                <a class="blog-nav-item" href="/archives">Archives</a>
+            
+        </nav>
+    </div>
+</div>
+
+<div class="blog-post">
+    <div class="blog-post-article-full">
+    
+
+<div class="blog-tags-container">
+    <span class="glyphicon glyphicon-tags"></span>
+    <a href="/tags/Linux/">#Linux</a> <a href="/tags/Binary/">#Binary</a>
+</div>
+
+    <!-- Title -->
+    <h2 class="blog-post-title">
+        <a href="/2018/09/27/从学习《汇编语言》到探索二进制世界（一）/">
+            从学习《汇编语言》到探索二进制世界（一）
+        </a>
+    </h2>
+    <!-- Date and Author -->
+    <p class="blog-post-meta">
+        2018-09-27
+        
+    </p>
+    <!-- Content -->
+    <p>*本系列文章为汇编程序设计课程学习记录plus有关拓展资料学习or二进制自学内容，maybe有一些pwn</p>
+<p>last update：2018-9-27</p>
+<p>*博客尚未完工，排版各种都比较emmmm 抱拳了</p>
+<h2 id="0x00"><a href="#0x00" class="headerlink" title="0x00"></a>0x00</h2><p><a href="/_posts/chap01.pdf">《汇编语言》第一章基础知识笔记下载</a>#包括ppt内梳理内容</p>
+<p>实验报告#wait</p>
+<blockquote>
+<p>本篇探索内容</p>
+</blockquote>
+<ul>
+<li>内存空间的映射及寻址（8086，IA-32）:如何从逻辑地址到物理地址</li>
+</ul>
+<h2 id="0x01-内存地址映射：逻辑地址和物理地址"><a href="#0x01-内存地址映射：逻辑地址和物理地址" class="headerlink" title="0x01 内存地址映射：逻辑地址和物理地址"></a>0x01 内存地址映射：逻辑地址和物理地址</h2><p>在《汇编语言》第一章中提到，在8086体系结构中，各物理存储器会被映射到一个总的逻辑存储器，即内存地址空间。内存地址空间是一个逻辑上的概念，而并非说在计算机中存在一个这样的物理器件。地址总线的宽度n直接决定了内存空间地址大小，即能拥有0~2的n次方个地址编号，我们称其寻址能力为2的n次方字节。</p>
+<p>8086PC机有20根地址总线，则其内存空间的地址范围为0000H~FFFFH，其寻址能力为1M。但是其内部的寄存器都是16位的，当CPU要发出一个地址到地址总线上时，最多只能发出16位的地址，但是8086却提供的是20位的物理地址。由此引入逻辑地址的概念，逻辑地址经过一系列转换得到物理地址 ，由此从16位获得了20位的物理地址。</p>
+<p>当CPU在这段空间中读写数据时，逻辑地址转换为物理地址发给地址总线，所以实际上是在与之对应的物理内存地址所在处的存储器中读写数据。</p>
+<p>那么逻辑地址究竟是怎么实现与物理地址互相转换的呢？</p>
+<h2 id="0x02-8086-16位-内存的寻址-实模式"><a href="#0x02-8086-16位-内存的寻址-实模式" class="headerlink" title="0x02 8086(16位)内存的寻址(实模式)"></a>0x02 8086(16位)内存的寻址(实模式)</h2><p>在8086这种16位架构中，内存地址分为两种：</p>
+<p><strong>逻辑地址</strong>：段基地址:段内偏移</p>
+<p><strong>物理地址</strong>：段基地址*16+段内偏移</p>
+<p>（在<a href="https://zh.wikipedia.org/zh-sg/%E7%9C%9F%E5%AF%A6%E6%A8%A1%E5%BC%8F" target="_blank" rel="noopener">实模式</a>下，即没有分页机制，逻辑地址计算得到的线性地址即为物理地址。）</p>
+<p>其中，</p>
+<p><strong>段基地址</strong>：从段寄存器中取得</p>
+<p><strong>段内偏移</strong>：IP寄存器/其他寄存器/16位数直接给出</p>
+<p>在8086CPU发的指令中使用逻辑地址。转换时通过上面的计算公式得出物理地址。</p>
+<p>在物理层面上，由总线接口单元BIU根据逻辑地址给出的段值和偏移形成20位的物理地址。</p>
+<p>由此可知，在8086中经过一次地址转换，可以将逻辑地址转换为物理地址</p>
+<h2 id="0x03-IA-32-32位-内存寻址-保护模式"><a href="#0x03-IA-32-32位-内存寻址-保护模式" class="headerlink" title="0x03 IA-32(32位)内存寻址(保护模式)"></a>0x03 IA-32(32位)内存寻址(保护模式)</h2><p>在相对更现代一点的32位架构中，内存地址分为三种</p>
+<p>(摘自《深入理解linux内核》)</p>
+<blockquote>
+<p>逻辑地址（Logical Address） </p>
+</blockquote>
+<p>  包含在机器语言指令中用来指定一个操作数或一条指令的地址。每个逻辑地址都由一个段和偏移量组成，偏移量指明了从段开始的地方到实际地址之间的距离。</p>
+<blockquote>
+<p>线性地址（linear address）(也称虚拟地址 virtual address)</p>
+</blockquote>
+<p>  是一个32位无符号整数，可以用来表示高达4GB的地址（2的32次方即32根地址总线寻址）。线性地址通常用十六进制数字表示，值的范围从0x00000000到0xffffffff。</p>
+<blockquote>
+<p>物理地址（physical address）</p>
+</blockquote>
+<p>  用于内存芯片级内存单元寻址。它们与从微处理器的地址引脚按发送到内存总线上的电信号相对应。物理地址由32位或36位无符号整数表示。</p>
+<p>所以在我们接下来讨论的情况中,具体是：</p>
+<p><strong>逻辑地址</strong>：段选择符+段内偏移</p>
+<p><strong>线性地址/虚拟地址</strong>：逻辑地址经过 <strong>分段机制</strong> 后形成线性地址。<br>（如果不启用分页，那么此线性地址即物理地址。所以在实模式下，逻辑地址计算得到的线性地址即为物理地址）</p>
+<p><strong>物理地址</strong>：线性地址经 <strong>分页机制</strong> 转换后就成了物理地址。</p>
+<p>由此我们可知在32位PC中有两次地址的转换 ，第一次是从逻辑地址转换到线性地址，通过分段机制；第二次是从线性地址转换到物理地址，通过分页机制。</p>
+<h3 id="1-分段机制：从逻辑地址到线性地址"><a href="#1-分段机制：从逻辑地址到线性地址" class="headerlink" title="1.分段机制：从逻辑地址到线性地址"></a>1.分段机制：从逻辑地址到线性地址</h3><p>首先介绍一些必要概念</p>
+<ul>
+<li><p>逻辑地址： 段选择符+段内偏移</p>
+</li>
+<li><p>LDT：local descriptor table，其地址保存在 GDTR寄存器中 </p>
+</li>
+<li><p>GDT：global descriptor table ，其地址保存在LDTR寄存器中</p>
+</li>
+<li><p>段选择符：保存在段寄存器中</p>
+</li>
+<li><p>段描述表：保存着基地址</p>
+</li>
+</ul>
+<p><img src="/images/1538043440986.png" alt="逻辑地址通过分段机制转换为线性地址"></p>
+<p><strong><em>在我找到一种美妙的能画出论文上那种示意图的画图方法前先忍受一下这个丑的一批但是绝对真实的手绘图吧23333//或者参考下方资料</em></strong></p>
+<h3 id="2-分页机制：从线性地址到物理地址"><a href="#2-分页机制：从线性地址到物理地址" class="headerlink" title="2.分页机制：从线性地址到物理地址"></a>2.分页机制：从线性地址到物理地址</h3><ul>
+<li><p>分页机制把物理内存分为4kb大小的一个一个页面</p>
+</li>
+<li><p>CR3寄存器：保存页目录的基地址</p>
+</li>
+<li><p>页目录：其中保存着页表的基址</p>
+</li>
+<li><p>页表：保存着物理空间里页面的基址</p>
+</li>
+</ul>
+<p><img src="/images/1538043363405.png" alt="线性地址通过分页机制转换为物理地址"></p>
+<hr>
+<blockquote>
+<h3 id="About-pwn"><a href="#About-pwn" class="headerlink" title="About pwn"></a>About pwn</h3></blockquote>
+<p>直观点来看，当我们反汇编一个32位elf程序所看到的这些地址(如0x08048453)都是逻辑地址(中offset的部分)，而segment selector则存在段寄存器中。</p>
+<p><img src="/images/1538048024640.png" alt="一个简单32位elf程序的反汇编结果"></p>
+<p>而段寄存器的选择由指令的性质决定，比如上图第2条指令将0x12345678这个值存到了栈上，则相应使用栈寄存器stack segment，根据其中的table indicator决定使用哪个段描述表，使用其中的Index值作为访问对应段描述表的下标，由此找到对应的描述项。然后再从对应段描述表中取出存放其中的Base Address加上offset(即反汇编看到的这些地址)得到线性地址。</p>
+<p>在做pwn题的过程中，我们时常要尝试拿到一个函数的虚拟地址，即其线性地址。而在开启了aslr技术的情况下，同一逻辑地址每次映射得到的结果都不一样，即每次运行程序时线性地址都是会变的。对于一个动态链接的elf程序（其中涉及的其余知识请阅读《程序员的自我修养》），其offset可以转化为链接进去的两个函数的offset，这是固定的且与其对于libc文件中的情况相同的，所以我们只用泄露base address即可计算出其余链接进去的函数的线性地址。</p>
+<p>只要知道libc的具体版本，反汇编libc文件即可得到libc_A_addr，libc_B_addr（如上图 反汇编得到的地址即为逻辑地址中的offset部分，两个函数的逻辑地址offset部分的差值即为两个函数间的offset，这个值不会改变）</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">offset=libc_offset=libc_A_addr-libc_B_addr            //=X_A_addr-X_B_addr</span><br></pre></td></tr></table></figure>
+<p>通过某种手段泄露X中一个函数A在该程序当时运行进程中所完成映射的线性地址 X_A_addr (这个手段就是通过某种二进制漏洞，如栈溢出等等)</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">base_addr=X_A_addr-libc_A_addr</span><br></pre></td></tr></table></figure>
+<p>由此可以计算出B函数在X中的线性地址X_B_addr</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">X_B_addr=base_addr+offset</span><br></pre></td></tr></table></figure>
+<h2 id="more-Qs"><a href="#more-Qs" class="headerlink" title="more Qs"></a>more Qs</h2><ol>
+<li>在逻辑地址映射为线性地址所经过的两次检查的具体详情</li>
+<li>分页机制的具体详情</li>
+<li>64位下的情况</li>
+<li>实模式和保护模式的异同和优缺</li>
+<li>参考资料2实验部分</li>
+</ol>
+<h2 id="参考-amp-拓展阅读"><a href="#参考-amp-拓展阅读" class="headerlink" title="参考&amp;拓展阅读"></a>参考&amp;拓展阅读</h2><ol>
+<li><a href="https://blog.csdn.net/godleading/article/details/18702029" target="_blank" rel="noopener">Linux中的地址空间以及I/O地址空间</a></li>
+<li><a href="http://www.ilinuxkernel.com/files/Linux_Memory_Address_Mapping.pdf" target="_blank" rel="noopener">Linux内存地址映射(32位)</a>  非常优秀的资料，图文并茂并附有实验使人更直观的理解32位下linux的内存地址映射</li>
+<li><a href="http://www.ilinuxkernel.com/files/Linux_x64_Memory_Address_Mapping.pdf" target="_blank" rel="noopener">Linux内存地址映射(64位)</a> 有空研读</li>
+<li><a href="https://www.cnblogs.com/chenwb89/p/operating_system_002.html" target="_blank" rel="noopener">操作系统篇-浅谈实模式与保护模式</a></li>
+<li><a href="https://blog.csdn.net/yang_yulei/article/details/22613327" target="_blank" rel="noopener">CPU的实模式与保护模式（简介）</a> 简单介绍和对比了16位的实模式和32位的保护模式</li>
+<li><a href="https://www.cnblogs.com/bethunebtj/articles/4839781.html" target="_blank" rel="noopener">实模式和保护模式区别及寻址方式</a> 详细介绍了分段和分页机制以及其意义</li>
+</ol>
+<h2 id="下期可能内容预告"><a href="#下期可能内容预告" class="headerlink" title="下期可能内容预告"></a>下期可能内容预告</h2><ul>
+<li>16/32/64位内存空间地址一般从哪里开始为什么<br><a href="https://blog.csdn.net/czc1997/article/details/81159126" target="_blank" rel="noopener">https://blog.csdn.net/czc1997/article/details/81159126</a></li>
+<li>32位为何不能使用完全4g的空间<br><a href="http://liaoph.com/motherboard-and-memory-map/" target="_blank" rel="noopener">http://liaoph.com/motherboard-and-memory-map/</a><br><a href="https://blog.csdn.net/qq_35623393/article/details/80277496" target="_blank" rel="noopener">https://blog.csdn.net/qq_35623393/article/details/80277496</a><br><a href="https://blog.csdn.net/ZHYFXY/article/details/70157248" target="_blank" rel="noopener">https://blog.csdn.net/ZHYFXY/article/details/70157248</a></li>
+<li>除了冯诺依曼结构还有什么计算机结构</li>
+<li>计算机体系结构详细 -coursera</li>
+<li>学习 <a href="https://www.tutorialspoint.com/assembly_programming/assembly_basic_syntax.htm" target="_blank" rel="noopener">https://www.tutorialspoint.com/assembly_programming/assembly_basic_syntax.htm</a> +程序员的自我修养</li>
+<li>编写汇编的工具+一些自己写的例子</li>
+<li>查看程序汇编的方法（win/linux）</li>
+<li>The Elements of Computing Systems: Building a Modern Computer from First Principles : chapter6 Assembler 学习</li>
+<li>课外图书阅读和思考</li>
+</ul>
+<p>*本人菜鸡，各位师傅如发现错误之处，欢迎纠错~ <a href="mailto:littleice@harekaze.top" target="_blank" rel="noopener">littleice@harekaze.top</a> </p>
+
+    <hr />
+    <!-- Tags and Categories links -->
+    
+</div>
+</div>
+
+<!-- Footer -->
+<footer class="blog-footer">
+    <p>My favorite band is <a href="">Arctic Monkeys</a>.</p>
+    <p>a mess Hexo Theme by <a href="">little1CE</a>.</p>
+    <p><a href="#">Back to top</a></p>
+</footer>
+<!-- After footer scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="/bootstrap/js/bootstrap.min.js"></script>
+<!-- IE10 viewport hack for Surface/desktop Windows 8 bug -->
+<script src="/js/ie10-viewport-bug-workaround.js"></script>
+</body>
+</html>
